@@ -241,12 +241,7 @@ export default function HomePage() {
           </div>
         </Link>
         
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addItem(product, 1); }}
-          className="absolute bottom-3 right-3 p-1.5 rounded-full border border-brand-200 text-brand-600 bg-white hover:bg-brand-50 transition-colors z-10"
-        >
-          <ShoppingCart size={16} strokeWidth={2.5} />
-        </button>
+
       </div>
     );
   };
@@ -333,12 +328,7 @@ export default function HomePage() {
             </div>
           </div>
         </Link>
-        <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addItem(product, 1); }}
-          className="absolute top-2 right-2 p-2 bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100 rounded-full text-gray-700 hover:text-brand-600 hover:bg-white active:scale-95 transition-all z-20"
-        >
-          <ShoppingCart size={16} strokeWidth={2.5} />
-        </button>
+
       </div>
     );
   };
