@@ -12,7 +12,7 @@ import { authService } from "@/services/auth.service";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [configLoading, setConfigLoading] = useState(true);
@@ -138,16 +138,16 @@ function LoginContent() {
             <div className="space-y-6">
               <div className="flex flex-col gap-1">
                 <label className="text-slate-500 text-[11px] font-bold uppercase tracking-wider">
-                  Email Address
+                  Email or Phone Number
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  value={form.identifier}
+                  onChange={(e) => setForm({ ...form, identifier: e.target.value })}
                   className="w-full border-b-2 border-slate-200 py-2 text-sm font-medium text-slate-900 focus:outline-none focus:border-brand-600 transition-colors bg-transparent"
-                  placeholder="Enter your email"
-                  style={{ borderBottomColor: form.email ? config.primaryColor : undefined }}
+                  placeholder="Enter your email or phone"
+                  style={{ borderBottomColor: form.identifier ? config.primaryColor : undefined }}
                 />
               </div>
 
