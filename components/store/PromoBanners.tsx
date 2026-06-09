@@ -118,18 +118,7 @@ export default function PromoBanners({ banners = [] }: { banners?: any[] }) {
         </>
       )}
 
-      {/* Pagination dots */}
-      <div className="flex justify-center items-center gap-1.5 mt-3">
-        {displayBanners.map((_, index) => (
-          <div
-            key={index}
-            className={cn(
-              "transition-all duration-300 rounded-full h-1.5",
-              activeIndex === index ? "w-6 bg-brand-700" : "w-1.5 bg-slate-200"
-            )}
-          />
-        ))}
-      </div>
+
     </section>
   );
 }
