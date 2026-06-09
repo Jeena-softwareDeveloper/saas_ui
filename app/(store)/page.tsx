@@ -374,11 +374,9 @@ export default function HomePage() {
         <>
           {banners.length > 0 && <PromoBanners banners={banners} />}
           {categories.length > 0 && (
-        <section className="bg-white border-b border-slate-100 py-4 md:py-8 relative z-20">
+        <section className="bg-white border-b border-slate-100 pt-0 pb-4 md:pb-6 relative z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-            
-            <div className="flex flex-row items-stretch justify-start gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-4">
+            <div className="flex flex-row items-stretch justify-start gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-2">
               {categories.map((cat: any) => (
                 <Link
                   key={cat.id}
@@ -408,15 +406,15 @@ export default function HomePage() {
 
       {/* Top Sales Row */}
       {topSales.length > 0 && (
-        <section className="bg-white border-b border-slate-100 py-4 md:py-8">
+        <section className="bg-white border-b border-slate-100 pt-2 pb-4 md:pt-4 md:pb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
               <h2 className="text-lg md:text-xl font-bold text-slate-900">Best Selling Products</h2>
               <Link href="/products?sort=top-rated" className="text-xs md:text-sm text-brand-600 font-bold hover:underline flex items-center gap-1">
                 View All Products <ArrowRight size={14} />
               </Link>
             </div>
-            <div className="flex flex-row items-stretch justify-start gap-4 md:gap-5 overflow-x-auto no-scrollbar pb-4 snap-x">
+            <div className="flex flex-row items-stretch justify-start gap-4 md:gap-5 overflow-x-auto no-scrollbar pb-2 md:pb-4 snap-x">
               {topSales.map((product) => renderHorizontalProductCard(product))}
             </div>
           </div>
@@ -425,7 +423,7 @@ export default function HomePage() {
 
       {/* Recommended Products Row */}
       {recommended.length > 0 && (
-        <section className="py-3 md:py-6 bg-gradient-to-br from-brand-100/70 via-brand-50/50 to-slate-100/40 border-y border-brand-200/50 my-2 md:my-4 shadow-sm relative overflow-hidden">
+        <section className="pt-4 pb-3 md:pt-6 md:pb-6 bg-gradient-to-br from-brand-100/70 via-brand-50/50 to-slate-100/40 border-y border-brand-200/50 mb-2 md:mb-4 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-400/40 blur-3xl rounded-full -mr-16 -mt-16 animate-pulse pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-brand-200/30 blur-2xl rounded-full -ml-12 -mb-12 pointer-events-none"></div>
           
