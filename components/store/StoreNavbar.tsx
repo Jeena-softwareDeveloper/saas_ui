@@ -61,14 +61,11 @@ export default function StoreNavbar() {
   const { config: siteConfig } = useSiteConfig();
   const cartCount = itemCount();
 
-  // Fetch configs and apply saved theme color on mount
   useEffect(() => {
     storeService.getCategories().then(res => setDynamicCategories(res.data.data || [])).catch(() => {});
     setMounted(true);
   }, []);
 
-  // High-performance dynamic search parameter extraction running on every render
-  // Safe from infinite loops and guarantees perfect sync during client-side Next.js route transitions
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -79,7 +76,6 @@ export default function StoreNavbar() {
     }
   });
 
-  // Sticky header transition on scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -91,9 +87,9 @@ export default function StoreNavbar() {
       }
 
       if (currentScrollY > lastScrollY && currentScrollY > 120) {
-        setShowHeader(false); // collapse sub-bars
+        setShowHeader(false);
       } else {
-        setShowHeader(true); // reveal sub-bars
+        setShowHeader(true);
       }
       setLastScrollY(currentScrollY);
     };
@@ -102,7 +98,6 @@ export default function StoreNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  // Click outside listener for profile menu
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
@@ -128,7 +123,6 @@ export default function StoreNavbar() {
     router.push("/");
   };
 
-  // Safe robust comparison helper to match slugs/category strings in any format (spaces, ampersands, case-insensitive)
   const isCategoryMatch = (paramVal: string | null, slugVal: string) => {
     if (!paramVal) return false;
     const normParam = paramVal.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -136,7 +130,6 @@ export default function StoreNavbar() {
     return normParam === normSlug;
   };
 
-  // State calculations for active paths
   const isAllProductsActive = pathname.startsWith("/products") && !activeCategory;
   const isProductsActive = pathname.startsWith("/products") || pathname.startsWith("/category");
   const isCartActive = pathname === "/cart";
@@ -145,7 +138,6 @@ export default function StoreNavbar() {
 
   return (
     <>
-      {/* Header Placeholder to prevent content jumps */}
       <div className={cn(
         "w-full bg-slate-50 transition-all duration-300",
         (pathname !== "/" || isScrolled) ? "h-14 md:h-[112px]" : "h-[96px] md:h-[112px]"
@@ -153,7 +145,6 @@ export default function StoreNavbar() {
 
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-slate-100 select-none flex flex-col w-full">
         
-        {/* Top Header Bar */}
         <div className="bg-brand-50 w-full text-[11px] md:text-[10px] lg:text-[11px] text-brand-900 font-medium overflow-hidden hidden md:block h-10 opacity-100 border-b border-brand-100/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
             <div className="flex items-center gap-6">
@@ -167,12 +158,8 @@ export default function StoreNavbar() {
             </div>
           </div>
         </div>
-
-        {/* Main Brand & Controls Row */}
         <div className="h-14 md:h-[72px] flex items-center bg-white px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-4 md:gap-8">
-            
-            {/* Left Section: Mobile Menu Trigger + Logo */}
             <div className="flex items-center space-x-3 md:space-x-4 flex-shrink-0">
               <button
                 onClick={() => setIsMenuOpen(true)}
@@ -196,11 +183,9 @@ export default function StoreNavbar() {
               </Link>
             </div>
 
-            {/* Desktop Navigation Links */}
             <div className="hidden lg:flex items-center gap-6 ml-4 mr-auto">
               <Link href="/" className={cn("text-[13px] font-semibold transition-colors", pathname === "/" ? "text-brand-600 border-b-2 border-brand-600 pb-1" : "text-slate-700 hover:text-brand-600 pb-1 border-b-2 border-transparent")}>Home</Link>
               
-              {/* Shop Now Menu Dropdown */}
               <div className="group relative pb-1">
                 <Link href="/products" className="text-[13px] font-semibold text-slate-700 hover:text-brand-600 transition-colors flex items-center gap-1 border-b-2 border-transparent">Shop Now <ChevronDown size={14}/></Link>
                 <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-xl border border-slate-100 py-2 hidden group-hover:block z-50 max-h-96 overflow-y-auto">
@@ -214,7 +199,6 @@ export default function StoreNavbar() {
               <Link href="/blogs" className={cn("text-[13px] font-semibold transition-colors", pathname === "/blogs" ? "text-brand-600 border-b-2 border-brand-600 pb-1" : "text-slate-700 hover:text-brand-600 pb-1 border-b-2 border-transparent")}>Blog</Link>
             </div>
 
-            {/* Search Bar */}
             <form
               onSubmit={handleSearch}
               className={cn(
@@ -239,10 +223,8 @@ export default function StoreNavbar() {
               </button>
             </form>
 
-            {/* Right Section: Cart + Account dropdown */}
             <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 ml-auto lg:ml-0 relative z-20">
-
-              <Link href={mounted && isAuthenticated ? "/cart" : "/login"} id="navbar-cart-btn" className="flex items-center gap-1.5 text-slate-600 hover:text-brand-600 transition-colors relative">
+              <Link href={mounted && isAuthenticated ? "/cart" : "/login?redirect=/cart"} id="navbar-cart-btn" className="flex items-center gap-1.5 text-slate-600 hover:text-brand-600 transition-colors relative">
                 <div className="relative">
                   <ShoppingCart size={20} />
                   {mounted && cartCount > 0 && (
@@ -386,14 +368,14 @@ export default function StoreNavbar() {
               {/* Account section */}
               <SidebarSection title="Account">
                 <SidebarLink
-                  href={mounted && isAuthenticated ? "/account" : "/login"}
+                  href={mounted && isAuthenticated ? "/account" : "/login?redirect=/account"}
                   label={mounted && isAuthenticated && user ? `Profile (${user.name})` : "Login / Signup"}
                   icon={<User size={16} />}
                   isActive={isAccountActive}
                   onClick={() => setIsMenuOpen(false)}
                 />
                 <SidebarLink
-                  href={mounted && isAuthenticated ? "/cart" : "/login"}
+                  href={mounted && isAuthenticated ? "/cart" : "/login?redirect=/cart"}
                   label={mounted ? `My Cart (${cartCount})` : "My Cart (0)"}
                   icon={<ShoppingCart size={16} />}
                   isActive={isCartActive}

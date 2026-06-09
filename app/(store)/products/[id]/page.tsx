@@ -300,7 +300,7 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product) return;
     if (!isAuthenticated) {
-      router.push("/login");
+      router.push(`/login?redirect=${window.location.pathname}`);
       return;
     }
     setIsAddingToCart(true);
@@ -324,7 +324,7 @@ export default function ProductDetailPage() {
 
   const handleBuyNow = () => {
     if (!isAuthenticated) {
-      router.push("/login");
+      router.push(`/login?redirect=${window.location.pathname}`);
       return;
     }
     setIsBuyingNow(true);

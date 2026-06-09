@@ -32,7 +32,8 @@ function LoginContent() {
       if (userRole === "ADMIN" || userRole === "SUPER_ADMIN") {
         router.replace("/admin");
       } else {
-        router.replace("/");
+        const redirectTo = searchParams.get("redirect") || "/";
+        router.replace(redirectTo);
       }
     }
   }, [configLoading, isAuthenticated, user, router]);
@@ -51,7 +52,8 @@ function LoginContent() {
       if (user.role === "ADMIN") {
         router.push("/admin");
       } else {
-        router.push("/");
+        const redirectTo = searchParams.get("redirect") || "/";
+        router.push(redirectTo);
       }
     } catch (err: any) {
       setError(err?.response?.data?.message || "Invalid credentials");
