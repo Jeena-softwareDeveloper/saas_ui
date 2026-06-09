@@ -88,7 +88,7 @@ export default function PromoBanners({ banners = [] }: { banners?: any[] }) {
             key={banner.id}
             onClick={() => !isDown && router.push(banner.link || '#')}
             style={{ scrollSnapAlign: "center" }}
-            className="w-full shrink-0 aspect-[16/9] md:aspect-[3/1] lg:aspect-[3.5/1] relative overflow-hidden rounded-2xl bg-slate-50 transition-all duration-300"
+            className="w-full shrink-0 aspect-[2/1] md:aspect-[3.5/1] lg:aspect-[4/1] relative overflow-hidden rounded-2xl bg-slate-50 transition-all duration-300"
           >
             <img
               src={banner.imageUrl}
