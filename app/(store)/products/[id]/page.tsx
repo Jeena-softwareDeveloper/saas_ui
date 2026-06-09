@@ -436,10 +436,10 @@ export default function ProductDetailPage() {
                         <img
                           src={img}
                           alt={product.name}
-                          className="w-full h-[320px] md:h-full md:aspect-square object-contain p-4 md:p-6 transition-transform duration-500 md:group-hover:scale-150 origin-center"
+                          className="w-full h-[400px] md:h-full md:aspect-square object-contain p-4 md:p-6 transition-transform duration-500 md:group-hover:scale-150 origin-center"
                         />
                       ) : (
-                        <div className="w-full h-[320px] md:aspect-square flex items-center justify-center text-8xl bg-gray-50">📦</div>
+                        <div className="w-full h-[400px] md:aspect-square flex items-center justify-center text-8xl bg-gray-50">📦</div>
                       )}
                       {/* Zoom hint desktop */}
                       <div className="absolute inset-0 bg-black/0 md:group-hover:bg-black/5 transition-colors pointer-events-none hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100">
