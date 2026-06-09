@@ -299,6 +299,10 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     if (!product) return;
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
     setIsAddingToCart(true);
     try {
       const cartProduct = {
@@ -319,6 +323,10 @@ export default function ProductDetailPage() {
   };
 
   const handleBuyNow = () => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
     setIsBuyingNow(true);
     handleAddToCart();
   };

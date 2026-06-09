@@ -242,7 +242,7 @@ export default function StoreNavbar() {
             {/* Right Section: Cart + Account dropdown */}
             <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 ml-auto lg:ml-0 relative z-20">
 
-              <Link href="/cart" id="navbar-cart-btn" className="flex items-center gap-1.5 text-slate-600 hover:text-brand-600 transition-colors relative">
+              <Link href={mounted && isAuthenticated ? "/cart" : "/login"} id="navbar-cart-btn" className="flex items-center gap-1.5 text-slate-600 hover:text-brand-600 transition-colors relative">
                 <div className="relative">
                   <ShoppingCart size={20} />
                   {mounted && cartCount > 0 && (
@@ -393,7 +393,7 @@ export default function StoreNavbar() {
                   onClick={() => setIsMenuOpen(false)}
                 />
                 <SidebarLink
-                  href="/cart"
+                  href={mounted && isAuthenticated ? "/cart" : "/login"}
                   label={mounted ? `My Cart (${cartCount})` : "My Cart (0)"}
                   icon={<ShoppingCart size={16} />}
                   isActive={isCartActive}
