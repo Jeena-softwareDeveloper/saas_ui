@@ -439,8 +439,8 @@ export default function HomePage() {
             <div className="px-4 flex items-center justify-between mb-5 relative z-10">
                 <div className="flex items-center">
                     <div>
-                        <h2 className="text-[15px] font-black text-gray-900 tracking-tight uppercase leading-none italic">Recommended For You</h2>
-                        <p className="text-[10px] text-brand-600 font-bold mt-1 uppercase tracking-widest">Picked just for you</p>
+                        <h2 className="text-lg md:text-xl font-bold text-slate-900">Recommended For You</h2>
+                        <p className="text-sm text-slate-500 mt-1">Picked just for you</p>
                         </div>
                 </div>
                 <Link href="/products?sort=newest">
@@ -464,10 +464,10 @@ export default function HomePage() {
         {/* Cycle Filter Badges Row (Tuning filters in a single click) */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8 relative z-10">
           <div>
-            <h2 className="text-[18px] md:text-[20px] font-black text-gray-900 tracking-tight uppercase leading-none italic">
+            <h2 className="text-lg md:text-xl font-bold text-slate-900">
               {filterState.category || filterState.gender ? "Filtered Selections" : "For You"}
             </h2>
-            <p className="text-[10px] text-brand-600 font-bold mt-1.5 uppercase tracking-widest">
+            <p className="text-sm text-slate-500 mt-1">
               Explore All Products
             </p>
           </div>
