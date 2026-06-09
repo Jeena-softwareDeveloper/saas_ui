@@ -376,12 +376,7 @@ export default function HomePage() {
           {categories.length > 0 && (
         <section className="bg-white border-b border-slate-100 py-4 md:py-8 relative z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg md:text-xl font-bold text-slate-900">Shop by Category</h2>
-              <Link href="/products" className="text-xs md:text-sm text-brand-700 font-bold hover:underline flex items-center gap-1">
-                View All Categories <ArrowRight size={14} />
-              </Link>
-            </div>
+
             
             <div className="flex flex-row items-stretch justify-start gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-4">
               {categories.map((cat: any) => (
