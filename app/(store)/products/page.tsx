@@ -81,9 +81,11 @@ function ProductCard({ product }: { product: any }) {
         )}
 
         {/* Title */}
-        <h3 className="font-bold text-gray-900 text-[11.5px] md:text-[13px] line-clamp-2 leading-[16px] md:leading-[18px] mb-2 group-hover:text-brand-600 transition-colors duration-300 min-h-[32px] md:min-h-[36px]">
-          {product.name}
-        </h3>
+        <div className="h-[32px] md:h-[36px] mb-2 overflow-hidden">
+          <h3 className="font-bold text-gray-900 text-[11.5px] md:text-[13px] line-clamp-2 leading-[16px] md:leading-[18px] group-hover:text-brand-600 transition-colors duration-300">
+            {product.name}
+          </h3>
+        </div>
 
         {/* Stock badge row */}
         <div className="flex items-center justify-between mb-2.5">
