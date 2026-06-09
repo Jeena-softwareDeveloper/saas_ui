@@ -38,8 +38,7 @@ export default function RegisterPage() {
     
     try {
       const res = await authService.registerCustomer({
-        firstName: form.name.split(' ')[0] || "",
-        lastName: form.name.split(' ').slice(1).join(' ') || "",
+        name: form.name,
         phone: form.phone,
         password: form.password
       });
