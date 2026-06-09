@@ -221,7 +221,9 @@ export default function HomePage() {
           </div>
           
           <div className="ml-4 flex flex-col flex-grow justify-center">
-            <h3 className="text-[13px] font-bold text-gray-900 leading-tight line-clamp-2 h-[36px] overflow-hidden">{name}</h3>
+            <div className="h-[36px] overflow-hidden">
+              <h3 className="text-[13px] font-bold text-gray-900 leading-[18px] line-clamp-2">{name}</h3>
+            </div>
             <p className="text-[11px] text-gray-500 mt-1 font-medium">{weight}</p>
             
             <div className="flex items-baseline gap-1.5 mt-2">
@@ -289,9 +291,11 @@ export default function HomePage() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px] bg-gray-200" />
 
             {/* Product Title */}
-            <h3 className="font-bold text-gray-900 text-[11.5px] md:text-[13px] line-clamp-2 overflow-hidden leading-[16px] md:leading-[18px] mb-2 group-hover:text-brand-600 transition-colors duration-300 h-[32px] md:h-[36px]">
-              {name}
-            </h3>
+            <div className="h-[32px] md:h-[36px] mb-2 overflow-hidden">
+              <h3 className="font-bold text-gray-900 text-[11.5px] md:text-[13px] line-clamp-2 leading-[16px] md:leading-[18px] group-hover:text-brand-600 transition-colors duration-300">
+                {name}
+              </h3>
+            </div>
 
             {/* Rating & Payment Badges */}
             <div className="flex items-center justify-between mt-auto mb-1.5">
