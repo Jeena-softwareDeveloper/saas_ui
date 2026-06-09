@@ -436,10 +436,10 @@ export default function ProductDetailPage() {
                         <img
                           src={img}
                           alt={product.name}
-                          className="w-full h-[400px] md:h-full md:aspect-square object-contain p-4 md:p-6 transition-transform duration-500 md:group-hover:scale-150 origin-center"
+                          className="w-full h-[450px] md:h-full md:aspect-square object-contain p-4 md:p-6 transition-transform duration-500 md:group-hover:scale-150 origin-center"
                         />
                       ) : (
-                        <div className="w-full h-[400px] md:aspect-square flex items-center justify-center text-8xl bg-gray-50">📦</div>
+                        <div className="w-full h-[450px] md:aspect-square flex items-center justify-center text-8xl bg-gray-50">📦</div>
                       )}
                       {/* Zoom hint desktop */}
                       <div className="absolute inset-0 bg-black/0 md:group-hover:bg-black/5 transition-colors pointer-events-none hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -823,10 +823,25 @@ export default function ProductDetailPage() {
             {product.description && (
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <p className="text-[13px] font-bold text-gray-800 uppercase mb-3 tracking-wider">Full Description</p>
-                <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
-                  <p className="text-gray-600 leading-6 text-[13px] font-medium whitespace-pre-line">
-                    {product.description}
-                  </p>
+                <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 relative">
+                  <div className={cn("overflow-hidden transition-all duration-300 relative", showDetails ? "" : "max-h-[140px]")}>
+                    <p className="text-gray-600 leading-6 text-[13px] font-medium whitespace-pre-line">
+                      {product.description}
+                    </p>
+                    {!showDetails && (
+                      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none" />
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setShowDetails(!showDetails)}
+                    className="w-full mt-2 text-center text-brand-600 text-[11px] font-bold uppercase tracking-widest pt-2 border-t border-gray-200/50 hover:text-brand-700 flex items-center justify-center gap-1"
+                  >
+                    {showDetails ? (
+                      <>Show Less <ChevronUp size={14} /></>
+                    ) : (
+                      <>Read Full Description <ChevronDown size={14} /></>
+                    )}
+                  </button>
                 </div>
               </div>
             )}
