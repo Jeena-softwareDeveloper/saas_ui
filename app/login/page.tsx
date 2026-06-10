@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Store, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { Loader2, Store, AlertTriangle, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 import { useAuthStore } from "@/lib/authStore";
 import { useSiteConfig } from "@/lib/siteConfig";
@@ -20,12 +20,10 @@ function LoginContent() {
   const { login, isAuthenticated, user } = useAuthStore();
   const { config, fetchConfig, error: apiError } = useSiteConfig();
 
-  // Fetch tenant config on mount — MUST complete before login attempt
   useEffect(() => {
     fetchConfig().finally(() => setConfigLoading(false));
   }, []);
 
-  // Redirect already-authenticated users away from login page
   useEffect(() => {
     if (!configLoading && isAuthenticated && user) {
       const userRole = user.role?.toUpperCase();
@@ -117,8 +115,16 @@ function LoginContent() {
         </div>
 
         {/* Right Panel */}
-        <div className="w-full md:w-[60%] p-10 px-10 flex flex-col justify-center">
-          <div className="mb-8 md:hidden text-center">
+        <div className="w-full md:w-[60%] p-10 px-10 flex flex-col justify-center relative">
+          <div className="absolute top-6 left-6">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
+              <ArrowLeft size={16} /> 
+              <span className="hidden sm:inline">Back to Store</span>
+              <span className="sm:hidden">Back</span>
+            </Link>
+          </div>
+
+          <div className="mb-8 md:hidden text-center mt-4">
             <Link href="/" className="inline-flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center" style={{ backgroundColor: config.primaryColor }}>
                 <Store size={16} className="text-white" />
@@ -193,13 +199,6 @@ function LoginContent() {
                 : "Sign In"}
             </button>
             
-            <div className="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <p className="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Demo Credentials</p>
-              <div className="text-xs text-slate-500 font-medium space-y-1">
-                <p>Admin: admin@shopnest.com / admin123</p>
-                <p>Customer: user@shopnest.com / user123</p>
-              </div>
-            </div>
           </form>
 
           <div className="mt-8 text-center">

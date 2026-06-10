@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, Store } from "lucide-react";
+import { Loader2, Store, ArrowLeft } from "lucide-react";
 
 import { useAuthStore } from "@/lib/authStore";
 import { useSiteConfig } from "@/lib/siteConfig";
@@ -42,7 +42,7 @@ export default function RegisterPage() {
         phone: form.phone,
         password: form.password
       });
-      
+
       const { user, accessToken, refreshToken } = res.data.data;
       login(user, accessToken, refreshToken);
       router.push("/");
@@ -82,8 +82,16 @@ export default function RegisterPage() {
         </div>
 
         {/* Right Panel */}
-        <div className="w-full md:w-[60%] p-10 px-10 flex flex-col justify-center">
-          <div className="mb-6 md:hidden text-center">
+        <div className="w-full md:w-[60%] p-10 px-10 flex flex-col justify-center relative">
+          <div className="absolute top-6 left-6">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
+              <ArrowLeft size={16} /> 
+              <span className="hidden sm:inline">Back to Store</span>
+              <span className="sm:hidden">Back</span>
+            </Link>
+          </div>
+
+          <div className="mb-6 md:hidden text-center mt-4">
             <Link href="/" className="inline-flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center" style={{ backgroundColor: config.primaryColor }}>
                 <Store size={16} className="text-white" />
