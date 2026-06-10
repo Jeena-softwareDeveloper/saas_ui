@@ -39,21 +39,24 @@ export default function ProductFormPage() {
   const [newVariant, setNewVariant] = useState({ ...emptyVariant });
   const [variantFiles, setVariantFiles] = useState<File[]>([]);
 
-  const handleGenerateSku = async () => {
+  const handleGenerateIdentifiers = async () => {
     try {
-      const categoryId = product?.categoryId || "";
-      const res = await adminService.generateSku(categoryId);
-      if (res.data?.data?.sku) {
-        setNewVariant(prev => ({ ...prev, sku: res.data.data.sku }));
+      const res = await adminService.generateIdentifiers();
+      if (res.data?.data) {
+        setNewVariant(prev => ({
+          ...prev,
+          sku: prev.sku || res.data.data.sku,
+          barcode: prev.barcode || res.data.data.barcode
+        }));
       }
     } catch (error) {
-      console.error("Failed to generate SKU");
+      console.error("Failed to generate identifiers");
     }
   };
 
   useEffect(() => {
     if (step === 2 && !newVariant.sku) {
-      handleGenerateSku();
+      handleGenerateIdentifiers();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
@@ -129,12 +132,18 @@ export default function ProductFormPage() {
       if (newVariant.weight) formData.append("weight", newVariant.weight);
       
       // Default advanced fields
-      formData.append("isCodEnabled", String(true));
-      formData.append("isPublished", String(true));
-      formData.append("isFeatured", String(false));
+      formData.append("gstPercentage", newVariant.gstPercentage);
+      formData.append("shippingCharge", newVariant.shippingCharge);
+      formData.append("isCodEnabled", String(newVariant.isCodEnabled));
+      if (newVariant.isCodEnabled) formData.append("codCharge", newVariant.codCharge);
+      
+      formData.append("isPublished", String(newVariant.isPublished));
+      formData.append("isFeatured", String(newVariant.isFeatured));
       
       if (variantFiles.length > 0) {
-        formData.append("images", variantFiles[0]); // Only one image for this UI version
+        variantFiles.forEach(file => {
+          formData.append("images", file);
+        });
       }
 
       const res = await adminService.addProductVariant(productId, formData, { headers: { "Content-Type": "multipart/form-data" } });
@@ -142,7 +151,7 @@ export default function ProductFormPage() {
       setVariants(prev => [...prev, added]);
       setNewVariant({ ...emptyVariant });
       setVariantFiles([]);
-      handleGenerateSku(); // Fetch a new SKU for the next variant
+      handleGenerateSku();
     } catch (err) {
       alert("Failed to add variant");
     } finally {
@@ -235,9 +244,9 @@ export default function ProductFormPage() {
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <label className="label text-xs font-bold text-slate-800 mb-0">SKU <span className="text-red-500">*</span></label>
-                      <button type="button" onClick={handleGenerateSku} className="text-[10px] text-brand-600 hover:underline font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-200">Auto Generate</button>
+                      <button type="button" onClick={handleGenerateIdentifiers} className="text-[10px] text-brand-600 hover:underline font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-200">Auto Generate</button>
                     </div>
-                    <input className="input" required value={newVariant.sku} onChange={e => setNewVariant({...newVariant, sku: e.target.value})} placeholder="LCS-BLU-M" />
+                    <input className="input bg-slate-100 cursor-not-allowed" readOnly required value={newVariant.sku} onChange={e => setNewVariant({...newVariant, sku: e.target.value})} placeholder="LCS-BLU-M" />
                     <p className="text-[10px] text-slate-400 mt-1">Stock Keeping Unit (unique)</p>
                   </div>
                   <div>
@@ -261,28 +270,58 @@ export default function ProductFormPage() {
                     <p className="text-[10px] text-slate-400 mt-1">Product weight in grams</p>
                   </div>
                   <div>
-                    <label className="label text-xs font-bold text-slate-800">Barcode (Optional)</label>
-                    <input className="input" value={newVariant.barcode} onChange={e => setNewVariant({...newVariant, barcode: e.target.value})} placeholder="8906123456789" />
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="label text-xs font-bold text-slate-800 mb-0">Barcode (Optional)</label>
+                      <button type="button" onClick={handleGenerateIdentifiers} className="text-[10px] text-brand-600 hover:underline font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-200">Auto Generate</button>
+                    </div>
+                    <input className="input bg-slate-100 cursor-not-allowed" readOnly value={newVariant.barcode} onChange={e => setNewVariant({...newVariant, barcode: e.target.value})} placeholder="8906123456789" />
                     <p className="text-[10px] text-slate-400 mt-1">Scan barcode (optional)</p>
                   </div>
                   <div>
-                    <label className="label text-xs font-bold text-slate-800">Variant Image (Optional)</label>
-                    <div className="flex items-center gap-3 mt-1">
-                      {variantFiles.length === 0 ? (
-                        <label className="flex flex-col items-center justify-center flex-1 border-2 border-dashed border-slate-200 rounded-lg py-3 cursor-pointer hover:bg-slate-50 transition-colors">
-                          <Upload size={16} className="text-slate-400 mb-1.5" />
-                          <span className="text-[11px] font-medium text-slate-700">Upload Image</span>
-                          <span className="text-[9px] text-slate-400 mt-0.5">JPG, PNG up to 2MB</span>
-                          <input type="file" className="hidden" accept="image/*" onChange={e => e.target.files && setVariantFiles([e.target.files[0]])} />
-                        </label>
-                      ) : (
-                        <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-200 group">
-                          <img src={URL.createObjectURL(variantFiles[0])} alt="preview" className="w-full h-full object-cover" />
-                          <button type="button" onClick={() => setVariantFiles([])} className="absolute top-1 right-1 bg-white/90 hover:bg-white text-slate-700 rounded p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="label text-xs font-bold text-slate-800 mb-0">GST Percentage (%)</label>
+                      {newVariant.price && newVariant.gstPercentage && (
+                        <span className="text-[10px] font-bold text-emerald-600">
+                          GST Amount: ₹{((Number(newVariant.price) * Number(newVariant.gstPercentage)) / 100).toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                    <input className="input" type="number" min="0" max="100" value={newVariant.gstPercentage} onChange={e => setNewVariant({...newVariant, gstPercentage: e.target.value})} placeholder="18" />
+                    <p className="text-[10px] text-slate-400 mt-1">Tax rate for this variant</p>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <label className="flex items-center gap-2 cursor-pointer mt-5">
+                      <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#9c001f] focus:ring-[#9c001f]" checked={newVariant.isCodEnabled} onChange={e => setNewVariant({...newVariant, isCodEnabled: e.target.checked})} />
+                      <span className="text-sm text-slate-700 font-bold">Enable Cash on Delivery (COD)</span>
+                    </label>
+                  </div>
+                  {newVariant.isCodEnabled ? (
+                    <div className="animate-fade-in">
+                      <label className="label text-xs font-bold text-slate-800">COD Charge (₹)</label>
+                      <input className="input" type="number" min="0" value={newVariant.codCharge} onChange={e => setNewVariant({...newVariant, codCharge: e.target.value})} placeholder="40" />
+                      <p className="text-[10px] text-slate-400 mt-1">Extra fee for COD orders</p>
+                    </div>
+                  ) : (
+                    <div></div>
+                  )}
+                  <div className="col-span-1 sm:col-span-2">
+                    <label className="label text-xs font-bold text-slate-800">Variant Images (Optional)</label>
+                    <div className="flex flex-wrap items-center gap-3 mt-1">
+                      {variantFiles.map((file, idx) => (
+                        <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-200 group">
+                          <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                          <button type="button" onClick={() => setVariantFiles(prev => prev.filter((_, i) => i !== idx))} className="absolute top-1 right-1 bg-white/90 hover:bg-white text-slate-700 rounded p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
                             <X size={12} />
                           </button>
                         </div>
-                      )}
+                      ))}
+                      <label className="flex flex-col items-center justify-center w-20 h-20 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                        <Upload size={16} className="text-slate-400 mb-1" />
+                        <span className="text-[9px] font-medium text-slate-700">Upload</span>
+                        <input type="file" multiple className="hidden" accept="image/*" onChange={e => {
+                          if (e.target.files) setVariantFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+                        }} />
+                      </label>
                     </div>
                   </div>
                 </div>

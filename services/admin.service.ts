@@ -18,7 +18,7 @@ export const adminService = {
   deleteReview: async (id: string) => api.delete(`/admin/reviews/${id}`),
 
   getProducts: async () => api.get("/admin/products"),
-  generateSku: async (categoryId?: string) => api.get(`/admin/products/generate-sku${categoryId ? `?categoryId=${categoryId}` : ''}`),
+  generateIdentifiers: async () => api.get("/admin/products/generate-identifiers"),
   getProduct: async (id: string) => api.get(`/admin/products/${id}`),
   createProduct: async (data: any, config?: any) => api.post("/admin/products", data, config),
   updateProduct: async (id: string, data: any, config?: any) => api.put(`/admin/products/${id}`, data, config),
