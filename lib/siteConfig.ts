@@ -81,7 +81,7 @@ export const useSiteConfig = create<SiteConfigStore>()(
             headers["x-tenant-slug"] = authUser.tenantSlug;
           } else if (typeof window !== "undefined") {
             const hostname = window.location.hostname;
-            if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+            if (hostname && !hostname.includes("localhost") && !hostname.includes("127.0.0.1")) {
               const parts = hostname.split(".");
               if (parts.length > 0) headers["x-tenant-slug"] = parts[0];
             }

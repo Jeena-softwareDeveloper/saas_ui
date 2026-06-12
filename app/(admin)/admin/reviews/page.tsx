@@ -117,7 +117,7 @@ export default function AdminReviewsPage() {
         action={
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+            className="btn-primary"
           >
             <Plus size={16} />
             Add Review
@@ -300,7 +300,7 @@ export default function AdminReviewsPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
+              className="btn-primary"
             >
               {submitting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
               Save Review

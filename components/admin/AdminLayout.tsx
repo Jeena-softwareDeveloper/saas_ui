@@ -24,12 +24,14 @@ import {
   Award,
   Headphones,
   AlertTriangle,
+  ScanLine,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/authStore";
 import { useSiteConfig } from "@/lib/siteConfig";
 import { AdminHeaderProvider, useAdminHeader } from "@/lib/adminHeaderContext";
+import { BarcodeScannerModal } from "@/components/admin/BarcodeScannerModal";
 
 const getNavItems = (user: any) => {
   const role = user?.role;
@@ -73,7 +75,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated, logout, isAdmin } = useAuthStore();
-  const { config, applyTheme, fetchConfig, error } = useSiteConfig();
+  const { config, applyTheme, fetchConfig, error, isLoading } = useSiteConfig();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -104,7 +106,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     return pathname.startsWith(href);
   };
 
-  if (!mounted || !isAuthenticated || !isAdminUser) {
+  if (!mounted || !isAuthenticated || !isAdminUser || isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
         <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full" />
@@ -278,6 +280,7 @@ function AdminTopbar({
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   return (
     <header className="h-14 bg-white border-b border-slate-100 flex items-center px-4 lg:px-5 gap-3 shrink-0">
@@ -322,6 +325,15 @@ function AdminTopbar({
       {header?.action && (
         <div className="shrink-0">{header.action}</div>
       )}
+
+      {/* Scan Button */}
+      <button 
+        onClick={() => setScannerOpen(true)}
+        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+        title="Scan Barcode"
+      >
+        <ScanLine size={16} />
+      </button>
 
       {/* Bell */}
       <button className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 relative transition-colors">
@@ -372,6 +384,11 @@ function AdminTopbar({
           </div>
         )}
       </div>
+
+      <BarcodeScannerModal 
+        isOpen={scannerOpen} 
+        onClose={() => setScannerOpen(false)} 
+      />
     </header>
   );
 }

@@ -272,7 +272,7 @@ export default function StoreNavbar() {
                               <LayoutDashboard size={14} /> Store Admin
                             </Link>
                             {user?.role?.toUpperCase() === "SUPER_ADMIN" && (
-                              <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs text-purple-600 hover:bg-purple-50 transition-colors font-medium border-t border-slate-50">
+                              <a href={process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:5173"} target="_blank" rel="noopener noreferrer" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs text-purple-600 hover:bg-purple-50 transition-colors font-medium border-t border-slate-50">
                                 <ShieldCheck size={14} /> SaaS Admin Hub
                               </a>
                             )}

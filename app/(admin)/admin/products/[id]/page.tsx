@@ -5,11 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import {
   Upload, X, ArrowLeft, Check,
   Plus, Trash2, Edit2, Package, AlertCircle,
-  Download, Image as ImageIcon
+  Download, Image as ImageIcon, Star
 } from "lucide-react";
 import { adminService } from "@/services/admin.service";
 import { formatPrice } from "@/lib/utils";
 import { SetAdminHeader } from "@/lib/adminHeaderContext";
+import { Modal } from "@/components/ui/Modal";
+import { AlertTriangle } from "lucide-react";
 
 export default function ProductFormPage() {
   const params = useParams();
@@ -29,6 +31,9 @@ export default function ProductFormPage() {
   const [variants, setVariants] = useState<any[]>([]);
   const [submittingVariant, setSubmittingVariant] = useState(false);
   const [deletingVariantId, setDeletingVariantId] = useState<string | null>(null);
+  const [editingVariantId, setEditingVariantId] = useState<string | null>(null);
+  const [deleteVariantModal, setDeleteVariantModal] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const emptyVariant = {
     variantName: "", sku: "", price: "", compareAtPrice: "", stockQuantity: "",
@@ -146,12 +151,20 @@ export default function ProductFormPage() {
         });
       }
 
-      const res = await adminService.addProductVariant(productId, formData, { headers: { "Content-Type": "multipart/form-data" } });
-      const added = res.data.data;
-      setVariants(prev => [...prev, added]);
+      if (editingVariantId) {
+        const res = await adminService.updateProductVariant(productId, editingVariantId, formData, { headers: { "Content-Type": "multipart/form-data" } });
+        const updated = res.data.data;
+        setVariants(prev => prev.map(v => v.id === editingVariantId ? updated : v));
+        setEditingVariantId(null);
+      } else {
+        const res = await adminService.addProductVariant(productId, formData, { headers: { "Content-Type": "multipart/form-data" } });
+        const added = res.data.data;
+        setVariants(prev => [...prev, added]);
+        handleGenerateIdentifiers();
+      }
+
       setNewVariant({ ...emptyVariant });
       setVariantFiles([]);
-      handleGenerateSku();
     } catch (err) {
       alert("Failed to add variant");
     } finally {
@@ -160,16 +173,7 @@ export default function ProductFormPage() {
   };
 
   const handleDeleteVariant = async (variantId: string) => {
-    if (!confirm("Delete this variant?")) return;
-    setDeletingVariantId(variantId);
-    try {
-      await adminService.deleteProductVariant(product?.id || createdProductId, variantId);
-      setVariants(prev => prev.filter(v => v.id !== variantId));
-    } catch (err) {
-      alert("Failed to delete variant");
-    } finally {
-      setDeletingVariantId(null);
-    }
+    setDeleteVariantModal(variantId);
   };
 
   if (loading) return (
@@ -224,15 +228,17 @@ export default function ProductFormPage() {
           {/* Left Column */}
           <div className="lg:col-span-2 flex flex-col gap-6">
             
-            {/* Add Variant Box */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+            {/* Add/Edit Variant Box */}
+            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm" id="variant-form">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-bold text-slate-900">Add Variant</h3>
-                <button type="button" className="btn-secondary text-xs py-1.5 px-3">
-                  <Download size={14} className="mr-1" /> Import Variants
-                </button>
+                <h3 className="text-base font-bold text-slate-900">{editingVariantId ? "Edit Variant" : "Add Variant"}</h3>
+                {!editingVariantId && (
+                  <button type="button" className="btn-secondary text-xs py-1.5 px-3">
+                    <Download size={14} className="mr-1" /> Import Variants
+                  </button>
+                )}
               </div>
-              <p className="text-xs text-slate-500 mb-6">Add product variants like size, color, material etc.</p>
+              <p className="text-xs text-slate-500 mb-6">{editingVariantId ? "Update details for the selected variant." : "Add product variants like size, color, material etc."}</p>
               
               <form onSubmit={handleAddVariant} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
@@ -241,14 +247,7 @@ export default function ProductFormPage() {
                     <input className="input" required value={newVariant.variantName} onChange={e => setNewVariant({...newVariant, variantName: e.target.value})} placeholder="Linen Cotton Shirt - Blue - M" />
                     <p className="text-[10px] text-slate-400 mt-1">Unique name for this variant</p>
                   </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="label text-xs font-bold text-slate-800 mb-0">SKU <span className="text-red-500">*</span></label>
-                      <button type="button" onClick={handleGenerateIdentifiers} className="text-[10px] text-brand-600 hover:underline font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-200">Auto Generate</button>
-                    </div>
-                    <input className="input bg-slate-100 cursor-not-allowed" readOnly required value={newVariant.sku} onChange={e => setNewVariant({...newVariant, sku: e.target.value})} placeholder="LCS-BLU-M" />
-                    <p className="text-[10px] text-slate-400 mt-1">Stock Keeping Unit (unique)</p>
-                  </div>
+
                   <div>
                     <label className="label text-xs font-bold text-slate-800">Price (₹) <span className="text-red-500">*</span></label>
                     <input className="input" required type="number" step="0.01" value={newVariant.price} onChange={e => setNewVariant({...newVariant, price: e.target.value})} placeholder="899.00" />
@@ -269,14 +268,7 @@ export default function ProductFormPage() {
                     <input className="input" type="number" value={newVariant.weight} onChange={e => setNewVariant({...newVariant, weight: e.target.value})} placeholder="250" />
                     <p className="text-[10px] text-slate-400 mt-1">Product weight in grams</p>
                   </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="label text-xs font-bold text-slate-800 mb-0">Barcode (Optional)</label>
-                      <button type="button" onClick={handleGenerateIdentifiers} className="text-[10px] text-brand-600 hover:underline font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-200">Auto Generate</button>
-                    </div>
-                    <input className="input bg-slate-100 cursor-not-allowed" readOnly value={newVariant.barcode} onChange={e => setNewVariant({...newVariant, barcode: e.target.value})} placeholder="8906123456789" />
-                    <p className="text-[10px] text-slate-400 mt-1">Scan barcode (optional)</p>
-                  </div>
+
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <label className="label text-xs font-bold text-slate-800 mb-0">GST Percentage (%)</label>
@@ -307,6 +299,50 @@ export default function ProductFormPage() {
                   <div className="col-span-1 sm:col-span-2">
                     <label className="label text-xs font-bold text-slate-800">Variant Images (Optional)</label>
                     <div className="flex flex-wrap items-center gap-3 mt-1">
+                      {newVariant.images?.map((img: any, idx: number) => (
+                        <div key={`existing-${img.id || idx}`} className="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-200 group">
+                          <img src={img.imageUrl} alt="preview" className="w-full h-full object-cover" />
+                          <button type="button" onClick={async () => {
+                            if (editingVariantId && img.id) {
+                              try {
+                                const productId = product?.id || createdProductId;
+                                if (productId) {
+                                  await adminService.deleteVariantImage(productId, editingVariantId, img.id);
+                                  setVariants(prev => prev.map(v => v.id === editingVariantId ? { ...v, images: v.images.filter((i: any) => i.id !== img.id) } : v));
+                                }
+                              } catch (e) {
+                                alert('Failed to delete image');
+                                return;
+                              }
+                            }
+                            setNewVariant(prev => ({ ...prev, images: (prev.images || []).filter((_: any, i: number) => i !== idx) }));
+                          }} className="absolute top-1 right-1 bg-white/90 hover:bg-white text-slate-700 rounded p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <X size={12} />
+                          </button>
+                          {editingVariantId && img.id && (
+                            <button type="button" onClick={async () => {
+                              try {
+                                const productId = product?.id || createdProductId;
+                                if (productId) {
+                                  await adminService.setPrimaryVariantImage(productId, editingVariantId, img.id);
+                                  setVariants(prev => prev.map(v => v.id === editingVariantId ? {
+                                    ...v,
+                                    images: v.images.map((i: any) => ({ ...i, isPrimary: i.id === img.id }))
+                                  } : v));
+                                  setNewVariant(prev => ({
+                                    ...prev,
+                                    images: (prev.images || []).map((i: any) => ({ ...i, isPrimary: i.id === img.id }))
+                                  }));
+                                }
+                              } catch (e) {
+                                alert('Failed to set primary image');
+                              }
+                            }} className={`absolute top-1 left-1 rounded p-1 shadow-sm transition-opacity z-10 ${img.isPrimary ? 'bg-yellow-400 text-white opacity-100' : 'bg-white/90 hover:bg-white text-slate-700 opacity-0 group-hover:opacity-100'}`} title={img.isPrimary ? 'Primary Image' : 'Set as Primary'}>
+                              <Star size={12} className={img.isPrimary ? 'fill-current' : ''} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
                       {variantFiles.map((file, idx) => (
                         <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-200 group">
                           <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
@@ -326,8 +362,13 @@ export default function ProductFormPage() {
                   </div>
                 </div>
                 <div className="flex justify-end pt-2">
+                  {editingVariantId && (
+                    <button type="button" onClick={() => { setEditingVariantId(null); setNewVariant({ ...emptyVariant }); setVariantFiles([]); }} className="text-sm font-medium text-slate-500 mr-4 hover:text-slate-800">
+                      Cancel
+                    </button>
+                  )}
                   <button type="submit" className="bg-[#9c001f] hover:bg-[#7a0018] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors" disabled={submittingVariant}>
-                    <Plus size={16} strokeWidth={3} /> {submittingVariant ? "Adding..." : "Add Variant"}
+                    <Plus size={16} strokeWidth={3} /> {submittingVariant ? (editingVariantId ? "Updating..." : "Adding...") : (editingVariantId ? "Update Variant" : "Add Variant")}
                   </button>
                 </div>
               </form>
@@ -360,16 +401,45 @@ export default function ProductFormPage() {
                         <td className="px-5 py-3.5 text-slate-600">{v.stockQuantity}</td>
                         <td className="px-5 py-3.5 text-slate-600">{v.weight || "-"}</td>
                         <td className="px-5 py-3.5">
-                          {v.images?.[0] ? (
-                            <img src={v.images[0].imageUrl} className="w-9 h-9 rounded object-cover border border-slate-200" />
-                          ) : (
-                            <div className="w-9 h-9 bg-slate-100 rounded border border-slate-200 flex items-center justify-center">
-                              <ImageIcon size={14} className="text-slate-300"/>
-                            </div>
-                          )}
+                          {(() => {
+                            const variantImg = v.images?.find((img: any) => img.isPrimary)?.imageUrl || v.images?.[0]?.imageUrl || v.imageUrl;
+                            return variantImg ? (
+                              <img src={variantImg} className="w-9 h-9 rounded object-cover border border-slate-200" />
+                            ) : (
+                              <div className="w-9 h-9 bg-slate-100 rounded border border-slate-200 flex items-center justify-center">
+                                <ImageIcon size={14} className="text-slate-300"/>
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="px-5 py-3.5 text-center flex justify-center items-center h-full gap-3 mt-1.5">
-                          <button className="text-slate-400 hover:text-indigo-600 transition-colors"><Edit2 size={15}/></button>
+                          <button className="text-slate-400 hover:text-indigo-600 transition-colors" onClick={() => {
+                            setEditingVariantId(v.id);
+                            setNewVariant({
+                              variantName: v.variantName || "",
+                              sku: v.sku || "",
+                              price: v.price?.toString() || "",
+                              compareAtPrice: v.compareAtPrice?.toString() || "",
+                              stockQuantity: v.stockQuantity?.toString() || "",
+                              weight: v.weight?.toString() || "",
+                              barcode: v.barcode || "",
+                              description: v.description || "",
+                              tags: v.tags?.join(", ") || "",
+                              gstPercentage: v.gstPercentage?.toString() || "0",
+                              shippingCharge: v.shippingCharge?.toString() || "0",
+                              codCharge: v.codCharge?.toString() || "0",
+                              isCodEnabled: v.isCodEnabled ?? true,
+                              isPublished: v.isPublished ?? true,
+                              isFeatured: v.isFeatured ?? false,
+                              images: v.images || [],
+                            });
+                            setVariantFiles([]);
+                            setTimeout(() => {
+                              document.getElementById('variant-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 50);
+                          }}>
+                            <Edit2 size={15}/>
+                          </button>
                           <button className="text-slate-400 hover:text-red-600 transition-colors" onClick={() => handleDeleteVariant(v.id)} disabled={deletingVariantId === v.id}>
                             <Trash2 size={15}/>
                           </button>
@@ -388,7 +458,7 @@ export default function ProductFormPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-600 mt-2 bg-slate-50 p-3.5 rounded-lg border border-slate-100">
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-600 mt-4 bg-slate-50 p-3.5 rounded-lg border border-slate-100">
               <AlertCircle size={15} className="text-blue-500 shrink-0" />
               After adding all variants, click "Next: Review & Publish" to review your product before publishing.
             </div>
@@ -445,13 +515,21 @@ export default function ProductFormPage() {
                 )}
               </div>
 
-              <button 
-                className="w-full bg-[#9c001f] hover:bg-[#7a0018] text-white py-3.5 rounded-xl text-[13px] font-bold transition-colors mt-2" 
-                onClick={() => setStep(3)}
-                disabled={variants.length === 0}
-              >
-                Next: Review & Publish →
-              </button>
+              <div className="flex gap-3 mt-4">
+                <button 
+                  className="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-3 rounded-xl text-[13px] font-bold transition-colors" 
+                  onClick={() => setStep(1)}
+                >
+                  ← Back
+                </button>
+                <button 
+                  className="flex-[2] bg-[#9c001f] hover:bg-[#7a0018] text-white py-3 rounded-xl text-[13px] font-bold transition-colors disabled:opacity-50" 
+                  onClick={() => setStep(3)}
+                  disabled={variants.length === 0}
+                >
+                  Next: Review →
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -476,6 +554,49 @@ export default function ProductFormPage() {
         </div>
       )}
       
+      <Modal isOpen={!!deleteVariantModal} onClose={() => { if (!deletingVariantId) { setDeleteVariantModal(null); setDeleteError(null); } }} size="sm">
+        <div className="text-center py-2">
+          <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle size={24} className="text-red-600" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Delete this variant?</h3>
+          <p className="text-sm text-slate-500 mb-6">
+            This action cannot be undone. This variant and its data will be permanently removed.
+          </p>
+          
+          {deleteError && (
+            <div className="mb-6 p-3 bg-red-50 text-red-700 text-xs font-medium rounded-lg border border-red-100 text-left flex items-start gap-2">
+              <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+              <span>{deleteError}</span>
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button className="flex-1 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 py-2.5 rounded-lg font-bold" onClick={() => { setDeleteVariantModal(null); setDeleteError(null); }} disabled={deletingVariantId !== null}>Cancel</button>
+            <button className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-bold disabled:opacity-50" onClick={async () => {
+              const variantId = deleteVariantModal;
+              if (!variantId) return;
+              setDeletingVariantId(variantId);
+              setDeleteError(null);
+              try {
+                // If this is an existing product, it will have product?.id.
+                // If it's a new product, it will have createdProductId.
+                const pId = product?.id || createdProductId || id;
+                await adminService.deleteProductVariant(pId, variantId);
+                setVariants(prev => prev.filter(v => v.id !== variantId));
+                setDeleteVariantModal(null);
+              } catch (err: any) {
+                console.error("Delete Variant Error:", err);
+                setDeleteError(err?.response?.data?.message || err?.message || "Failed to delete variant. Please try again.");
+              } finally {
+                setDeletingVariantId(null);
+              }
+            }}>
+              {deletingVariantId ? "Deleting..." : "Yes, delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

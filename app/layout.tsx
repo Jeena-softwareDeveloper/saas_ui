@@ -11,8 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
   let storeName = "";
   let tenantSlug = "";
 
-  if (host !== "localhost" && host !== "127.0.0.1") {
-    tenantSlug = host.split(".")[0];
+  if (host && !host.includes("localhost") && !host.includes("127.0.0.1")) {
+    tenantSlug = host.split(":")[0].split(".")[0];
   }
 
   try {

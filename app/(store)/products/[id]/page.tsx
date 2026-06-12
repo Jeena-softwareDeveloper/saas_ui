@@ -245,6 +245,7 @@ export default function ProductDetailPage() {
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [selectedImageToView, setSelectedImageToView] = useState<string | null>(null);
   const [zoomScale, setZoomScale] = useState(1);
+  const [showQuantitySheet, setShowQuantitySheet] = useState<"cart" | "buy" | null>(null);
 
   // Reset zoom when viewer opens
   useEffect(() => {
@@ -364,11 +365,11 @@ export default function ProductDetailPage() {
   }
 
   // Resolve images to string array
-  const images: string[] = (
-    product.images?.length > 0 ? product.images : []
-  )
-    .map(resolveImageUrl)
-    .filter(Boolean);
+  const baseImages = (product.images?.length > 0 ? product.images : []).map(resolveImageUrl).filter(Boolean);
+  const variantImages = selectedVariant?.images?.length > 0 ? selectedVariant.images.map(resolveImageUrl).filter(Boolean) : [];
+  
+  // Create a unique array prioritizing variant images
+  const images: string[] = Array.from(new Set([...variantImages, ...baseImages]));
 
   if (images.length === 0) images.push(""); // placeholder
 
@@ -510,12 +511,64 @@ export default function ProductDetailPage() {
 
             {/* Available Styles removed as per user request */}
 
+            {/* Variants */}
+            {variants.length > 0 && (
+              <>
+                <div className="bg-white px-4 pt-3 pb-3 md:px-0 md:pt-0 md:pb-4 border-b border-gray-100 mb-4">
+                  <div className="flex flex-wrap gap-3">
+                    {variants.map((v: any) => {
+                      const varPrice = v.price || price;
+                      const varImgUrl = v.images?.length > 0 ? resolveImageUrl(v.images[0]) : null;
+                      return (
+                        <button
+                          key={v.id}
+                          title={v.variantName}
+                          onClick={() => {
+                            setSelectedVariant(v);
+                            setQuantity(1);
+                            if (v.images?.length > 0) {
+                              setActiveImageIndex(0);
+                              if (imageScrollRef.current) {
+                                imageScrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+                              }
+                            }
+                          }}
+                          disabled={v.stockQuantity <= 0}
+                          className={cn(
+                            "min-w-[62px] h-auto min-h-[44px] py-1 px-1 border-2 rounded-lg flex flex-col items-center justify-center transition-all shrink-0",
+                            selectedVariant?.id === v.id
+                              ? "border-brand-600 bg-brand-50"
+                              : v.stockQuantity > 0
+                              ? "border-gray-100 bg-white hover:border-brand-200"
+                              : "border-gray-50 opacity-30 bg-gray-50"
+                          )}
+                        >
+                          {varImgUrl ? (
+                            <img src={varImgUrl} alt={v.variantName} className="w-14 h-14 object-cover rounded shadow-sm" />
+                          ) : (
+                            <>
+                              <span className={`font-black text-[12px] uppercase tracking-tighter px-2 mt-1 ${selectedVariant?.id === v.id ? "text-brand-600" : "text-gray-800"}`}>
+                                {v.variantName}
+                              </span>
+                              <span className={`text-[8px] font-medium uppercase mt-0.5 mb-1 ${selectedVariant?.id === v.id ? "text-brand-600" : "text-gray-400"}`}>
+                                ₹{varPrice}
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
             {/* Price & Title */}
             <div className="bg-white px-4 pt-2 pb-3 md:px-0 md:pt-0">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1 pr-4">
                   <h1 className="text-[14px] font-bold text-gray-800 leading-tight tracking-tight">
-                    {product.name}
+                    {selectedVariant ? selectedVariant.variantName : product.name}
                   </h1>
 
                   {/* Price Section */}
@@ -670,6 +723,28 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
+            {/* Quantity selector */}
+            {stock > 0 && (
+              <div className="bg-white px-4 pt-3 pb-2 md:px-0">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Quantity</p>
+                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden w-fit shadow-sm bg-white">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="w-12 text-center text-sm font-bold text-gray-900">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
+                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Desktop action buttons */}
             <div className="hidden md:flex gap-3 mt-4 mb-2 px-4 md:px-0">
               <button
@@ -703,67 +778,6 @@ export default function ProductDetailPage() {
                 )}
               </button>
             </div>
-
-            {/* Variants */}
-            {variants.length > 0 && (
-              <>
-                <div className="h-[6px] bg-gray-100/80 md:hidden" />
-                <div className="bg-white px-4 pt-3 pb-1 md:px-0">
-                  <p className="text-[14px] font-bold text-gray-800 mb-3">Select Variant</p>
-                  <div className="flex flex-wrap gap-3">
-                    {variants.map((v: any) => {
-                      const varPrice = v.price || price;
-                      return (
-                        <button
-                          key={v.id}
-                          onClick={() => { setSelectedVariant(v); setQuantity(1); }}
-                          disabled={v.stockQuantity <= 0}
-                          className={cn(
-                            "min-w-[62px] h-11 px-3 border-2 rounded-lg flex flex-col items-center justify-center transition-all shrink-0",
-                            selectedVariant?.id === v.id
-                              ? "border-brand-600 bg-brand-50"
-                              : v.stockQuantity > 0
-                              ? "border-gray-100 bg-white"
-                              : "border-gray-50 opacity-30 bg-gray-50"
-                          )}
-                        >
-                          <span className={`font-black text-[12px] uppercase tracking-tighter ${selectedVariant?.id === v.id ? "text-brand-600" : "text-gray-800"}`}>
-                            {v.variantName}
-                          </span>
-                          <span className={`text-[8px] font-medium uppercase mt-0.5 ${selectedVariant?.id === v.id ? "text-brand-600" : "text-gray-400"}`}>
-                            ₹{varPrice}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Quantity selector */}
-            {stock > 0 && (
-              <div className="bg-white px-4 pt-3 pb-2 md:px-0">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Quantity</p>
-                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden w-fit shadow-sm bg-white">
-                  <button
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="w-12 text-center text-sm font-bold text-gray-900">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
-                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-
 
             {/* Trust Micro-Banners */}
             <div className="bg-white px-4 pb-4 pt-4 md:px-0 border-t border-gray-200">
@@ -1038,7 +1052,7 @@ export default function ProductDetailPage() {
         <div className="p-2 pb-[calc(8px+env(safe-area-inset-bottom))]">
           <div className="flex gap-2">
             <button
-              onClick={handleAddToCart}
+              onClick={() => setShowQuantitySheet("cart")}
               disabled={isAddingToCart || stock <= 0}
               className={cn(
                 "flex-1 h-11 border-2 rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]",
@@ -1049,24 +1063,18 @@ export default function ProductDetailPage() {
             >
               <ShoppingCart size={16} className={stock <= 0 ? "text-gray-400" : "text-brand-600"} />
               <span className={`font-black text-[11px] uppercase tracking-wider ${stock <= 0 ? "text-gray-400" : "text-brand-600"}`}>
-                {stock <= 0 ? "SOLD" : isAddingToCart ? "..." : `Add ${quantity} to Cart`}
+                {stock <= 0 ? "SOLD" : "Add to Cart"}
               </span>
             </button>
             <button
-              onClick={handleBuyNow}
+              onClick={() => setShowQuantitySheet("buy")}
               disabled={isBuyingNow || stock <= 0}
               className="flex-[1.2] h-11 bg-brand-600 rounded-lg flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:bg-gray-400 disabled:shadow-none"
             >
-              {isBuyingNow ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Zap size={18} className="text-white" />
-                  <span className="text-white font-black text-[11px] uppercase tracking-widest">
-                    {stock <= 0 ? "Out of Stock" : `Buy ${quantity} Now`}
-                  </span>
-                </>
-              )}
+              <Zap size={18} className="text-white" />
+              <span className="text-white font-black text-[11px] uppercase tracking-widest">
+                {stock <= 0 ? "Out of Stock" : "Buy Now"}
+              </span>
             </button>
           </div>
         </div>
@@ -1307,11 +1315,85 @@ export default function ProductDetailPage() {
         </div>
       )}
 
+      {/* ===== MOBILE QUANTITY SHEET ===== */}
+      {showQuantitySheet && (
+        <div className="fixed inset-0 z-[2000] flex items-end animate-fade-in md:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowQuantitySheet(null)} />
+          <div className="relative bg-white w-full rounded-t-lg overflow-hidden z-10 p-6 pb-8 shadow-2xl animate-slide-up">
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
+            
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-16 h-16 rounded-lg border border-gray-100 overflow-hidden shrink-0">
+                <img 
+                  src={selectedVariant?.images?.[0] ? resolveImageUrl(selectedVariant.images[0]) : (product.images?.[0] ? resolveImageUrl(product.images[0]) : "")} 
+                  className="w-full h-full object-cover" 
+                  alt="" 
+                />
+              </div>
+              <div>
+                <h3 className="text-[14px] font-normal text-gray-900 leading-tight mb-1">
+                  {selectedVariant ? selectedVariant.variantName : product.name}
+                </h3>
+                <span className="text-[18px] font-medium text-brand-600">
+                  ₹{selectedVariant ? selectedVariant.price : price}
+                </span>
+              </div>
+            </div>
+
+            <div className="mb-8">
+              <p className="text-[11px] font-normal text-gray-400 uppercase tracking-widest mb-3">Select Quantity</p>
+              <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden w-full h-14 shadow-sm bg-white">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="flex-1 h-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:bg-gray-100"
+                >
+                  <Minus size={20} />
+                </button>
+                <div className="w-20 h-full flex items-center justify-center border-x border-gray-100">
+                  <span className="text-[20px] font-normal text-gray-900">{quantity}</span>
+                </div>
+                <button
+                  onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
+                  className="flex-1 h-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors active:bg-gray-100"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
+              <p className="text-center text-[10px] text-gray-400 font-medium mt-3 uppercase tracking-wider">
+                {stock} units available in stock
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                const action = showQuantitySheet;
+                setShowQuantitySheet(null);
+                if (action === "cart") handleAddToCart();
+                else handleBuyNow();
+              }}
+              disabled={isAddingToCart || isBuyingNow}
+              className="w-full h-14 bg-brand-600 text-white rounded-lg flex items-center justify-center gap-2 font-normal text-[13px] uppercase tracking-widest shadow-lg shadow-brand-600/30 active:scale-[0.98] transition-all"
+            >
+              {(isAddingToCart && showQuantitySheet === "cart") || (isBuyingNow && showQuantitySheet === "buy") ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  {showQuantitySheet === "buy" ? <Zap size={18} /> : <ShoppingCart size={18} />}
+                  Continue to {showQuantitySheet === "buy" ? "Checkout" : "Cart"}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fade-in 0.2s ease-out; }
+        @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
       `}</style>
     </div>
   );

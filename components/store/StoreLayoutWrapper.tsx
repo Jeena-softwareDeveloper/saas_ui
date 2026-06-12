@@ -28,8 +28,8 @@ export default function StoreLayoutWrapper({
           tenantSlug = previewSlug;
         } else {
           const host = window.location.host;
-          if (host !== "localhost:3000" && host !== "127.0.0.1:3000") {
-            const parts = host.split(".");
+          if (host && !host.includes("localhost") && !host.includes("127.0.0.1")) {
+            const parts = host.split(":")[0].split(".");
             if (parts.length > 0) {
               tenantSlug = parts[0];
             }

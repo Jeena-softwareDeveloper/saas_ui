@@ -158,66 +158,64 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Checkout</h1>
-
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 animate-fade-in">
       {/* Progress */}
-      <div className="flex items-center mb-8">
+      <div className="flex items-center mb-4 sticky top-[56px] md:top-[112px] z-40 bg-slate-50 py-2 -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-transparent shadow-none transition-shadow">
         {steps.map((s, i) => (
           <div key={s.id} className="flex items-center flex-1 last:flex-none">
-            <div className={`flex items-center gap-2 ${step >= s.id ? "text-indigo-600" : "text-slate-400"}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all
+            <div className={`flex items-center gap-1.5 sm:gap-2 ${step >= s.id ? "text-indigo-600" : "text-slate-400"}`}>
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-sm font-bold border-2 transition-all
                 ${step > s.id ? "bg-indigo-600 border-indigo-600 text-white" :
                   step === s.id ? "border-indigo-600 text-indigo-600 bg-indigo-50" :
                   "border-slate-200 text-slate-400 bg-white"}`}>
-                {step > s.id ? <Check size={14} /> : s.id}
+                {step > s.id ? <Check size={12} className="sm:w-[14px] sm:h-[14px]" /> : s.id}
               </div>
-              <span className="text-sm font-medium hidden sm:inline">{s.label}</span>
+              <span className="text-[11px] sm:text-sm font-medium hidden sm:inline">{s.label}</span>
             </div>
             {i < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mx-3 transition-colors ${step > s.id ? "bg-indigo-600" : "bg-slate-200"}`} />
+              <div className={`flex-1 h-0.5 mx-2 sm:mx-3 transition-colors ${step > s.id ? "bg-indigo-600" : "bg-slate-200"}`} />
             )}
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Form */}
         <div className="lg:col-span-2">
           {/* Step 1: Address */}
           {step === 1 && (
-            <div className="card p-6 space-y-4 animate-fade-in">
+            <div className="card p-4 md:p-5 space-y-3 animate-fade-in">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <MapPin size={18} className="text-indigo-600" /> Delivery Address
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="label">Full Name *</label>
+                  <label className="label mb-1">Full Name *</label>
                   <input className="input" placeholder="John Doe" value={address.name}
                     onChange={(e) => setAddress({ ...address, name: e.target.value })} required />
                 </div>
                 <div>
-                  <label className="label">Phone Number *</label>
+                  <label className="label mb-1">Phone Number *</label>
                   <input className="input" placeholder="+91 98765 43210" value={address.phone}
                     onChange={(e) => setAddress({ ...address, phone: e.target.value })} required />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="label">Address Line 1 *</label>
+                  <label className="label mb-1">Address Line 1 *</label>
                   <input className="input" placeholder="House/Flat No., Street Name" value={address.line1}
                     onChange={(e) => setAddress({ ...address, line1: e.target.value })} required />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="label">Address Line 2</label>
+                  <label className="label mb-1">Address Line 2</label>
                   <input className="input" placeholder="Landmark, Area (optional)" value={address.line2}
                     onChange={(e) => setAddress({ ...address, line2: e.target.value })} />
                 </div>
                 <div>
-                  <label className="label">City *</label>
+                  <label className="label mb-1">City *</label>
                   <input className="input" placeholder="Mumbai" value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })} required />
                 </div>
                 <div>
-                  <label className="label">State *</label>
+                  <label className="label mb-1">State *</label>
                   <select className="input" value={address.state}
                     onChange={(e) => setAddress({ ...address, state: e.target.value })}>
                     <option value="">Select State</option>
@@ -227,12 +225,12 @@ export default function CheckoutPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="label">PIN Code *</label>
+                  <label className="label mb-1">PIN Code *</label>
                   <input className="input" placeholder="400001" maxLength={6} value={address.pincode}
                     onChange={(e) => setAddress({ ...address, pincode: e.target.value })} required />
                 </div>
                 <div>
-                  <label className="label">Country</label>
+                  <label className="label mb-1">Country</label>
                   <input className="input bg-slate-50" value="India" readOnly />
                 </div>
               </div>
@@ -246,62 +244,62 @@ export default function CheckoutPage() {
 
           {/* Step 2: Payment */}
           {step === 2 && (
-            <div className="card p-6 space-y-5 animate-fade-in">
+            <div className="card p-4 md:p-5 space-y-4 animate-fade-in">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <CreditCard size={18} className="text-indigo-600" /> Payment Method
               </h2>
 
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {[
                   { id: "card", label: "Credit / Debit Card", emoji: "💳", desc: "Visa, Mastercard, RuPay" },
                   { id: "upi", label: "UPI", emoji: "📱", desc: "GPay, PhonePe, BHIM" },
                   { id: "netbanking", label: "Net Banking", emoji: "🏦", desc: "All major banks" },
                   { id: "cod", label: "Cash on Delivery", emoji: "💵", desc: "Pay when delivered" },
                 ].map((method) => (
-                  <label key={method.id} className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all
+                  <label key={method.id} className={`flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all
                     ${paymentMethod === method.id ? "border-indigo-500 bg-indigo-50" : "border-slate-200 hover:border-slate-300"}`}>
                     <input type="radio" name="payment" value={method.id} checked={paymentMethod === method.id}
                       onChange={() => setPaymentMethod(method.id)} className="accent-indigo-600" />
-                    <span className="text-xl">{method.emoji}</span>
+                    <span className="text-lg">{method.emoji}</span>
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{method.label}</p>
-                      <p className="text-xs text-slate-400">{method.desc}</p>
+                      <p className="text-[13px] font-semibold text-slate-900">{method.label}</p>
+                      <p className="text-[11px] text-slate-400">{method.desc}</p>
                     </div>
                   </label>
                 ))}
               </div>
 
               {paymentMethod === "card" && (
-                <div className="space-y-3 p-4 bg-slate-50 rounded-xl animate-fade-in">
+                <div className="space-y-2.5 p-3.5 bg-slate-50 rounded-xl animate-fade-in">
                   <div>
-                    <label className="label">Card Number</label>
+                    <label className="label mb-1">Card Number</label>
                     <input className="input font-mono" placeholder="1234 5678 9012 3456" maxLength={19} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="label">Expiry Date</label>
+                      <label className="label mb-1">Expiry Date</label>
                       <input className="input" placeholder="MM/YY" maxLength={5} />
                     </div>
                     <div>
-                      <label className="label">CVV</label>
+                      <label className="label mb-1">CVV</label>
                       <input className="input font-mono" placeholder="•••" maxLength={4} type="password" />
                     </div>
                   </div>
                   <div>
-                    <label className="label">Cardholder Name</label>
+                    <label className="label mb-1">Cardholder Name</label>
                     <input className="input" placeholder="Name as on card" />
                   </div>
                 </div>
               )}
 
               {paymentMethod === "upi" && (
-                <div className="p-4 bg-slate-50 rounded-xl animate-fade-in">
-                  <label className="label">UPI ID</label>
+                <div className="p-3.5 bg-slate-50 rounded-xl animate-fade-in">
+                  <label className="label mb-1">UPI ID</label>
                   <input className="input" placeholder="yourname@paytm" />
                 </div>
               )}
 
-              <div className="flex gap-3 justify-between pt-2">
+              <div className="flex gap-3 justify-between pt-1">
                 <button onClick={() => setStep(1)} className="btn-secondary">← Back</button>
                 <button onClick={() => setStep(3)} className="btn-primary">
                   Review Order <ChevronRight size={16} />
@@ -312,7 +310,7 @@ export default function CheckoutPage() {
 
           {/* Step 3: Confirm */}
           {step === 3 && (
-            <div className="card p-6 space-y-4 animate-fade-in">
+            <div className="card p-4 md:p-5 space-y-3 animate-fade-in">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Package size={18} className="text-indigo-600" /> Review Your Order
               </h2>
